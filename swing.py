@@ -27,11 +27,8 @@ while running:
             pos = pygame.mouse.get_pos()
             radius = math.sqrt(((player_pos[1]-pos[1])**2) + ((player_pos[0]-pos[0])**2))
             bobAngle = math.atan2(player_pos[1]- pos[1], player_pos[0] - pos[0])
-            print(radius)
-            
-
-            # pend = pendulum(pos)
-
+            bobSpeed = 0.0001
+            airRes = 0
             mouse = True
         elif event.type == pygame.MOUSEBUTTONUP:
             mouse = False
@@ -40,59 +37,12 @@ while running:
     if(mouse):
         player_pos[0] = pos[0] + radius * math.cos(bobAngle)
         player_pos[1] = pos[1] + radius * math.sin(bobAngle)
-        bobAngle = math.atan2(player_pos[1]- pos[1], player_pos[0] - pos[0])
+        bobAcceleration = 0.0001 * math.cos(bobAngle)
+        bobSpeed += bobAcceleration
+        bobAngle += bobSpeed
     pygame.draw.circle(screen, "red", player_pos, 40)
     pygame.display.flip()
-
-    # ev = pygame.event.get()
-    # for event in ev:
-    #     if event.type == pygame.MOUSEBUTTONDOWN:
-    #         pos = pygame.mouse.get_pos()
-    #         radius = math.sqrt(((player_pos[1]-pos[1])**2) + ((player_pos[0]-pos[0])**2))
-    #         bobAngle = math.atan2(player_pos[1]- pos[1], player_pos[0] - pos[0])
-    #         print(radius)
-    #         acceleration = [math.cos(bobAngle) * 0.001, abs(math.sin(bobAngle) * 0.001)]
-    #         speed = [0, 0]
-            
-
-    #         # pend = pendulum(pos)
-
-    #         mouse = True
-    #     elif event.type == pygame.MOUSEBUTTONUP:
-    #         mouse = False
-    # screen.fill("purple")
-    
-    # if(mouse):
-    #     player_pos[0] += speed[0]
-    #     player_pos[1] += speed[1]
-    #     bobAngle = math.atan2(player_pos[1]- pos[1], player_pos[0] - pos[0])
-    #     acceleration = [math.cos(bobAngle) * 0.001, math.sin(bobAngle) * 0.001]
-    #     speed[0] += acceleration[0]
-    #     speed[1] += acceleration[1]
-
-
-
-
-
-
-
-
-
-    # if(mouse):
-    #    bobAngle = pend.getAngle()
-    # else:
-    #     acceleration[0] = 0
-    # acceleration[1] += abs(gravity * math.sin(bobAngle))
-    # acceleration[0] += gravity * math.cos(bobAngle)
-    # print(f'acceleration y = {acceleration[1]}')
-    # print(f'acceleration x = {acceleration[0]}')
-
-    # velocity[1] += acceleration[1]
-    # velocity[0] += acceleration[0]
-
-    # player_pos[1] += velocity[1]
-    # player_pos[0] += velocity[0]
-    clock.tick(600) 
+    # clock.tick(60) 
 
 pygame.quit()
         
