@@ -35,6 +35,7 @@ while running:
     screen.fill("purple")
     
     if(mouse):
+        pygame.draw.line(screen, 'black', pos, player_pos, 1)
         player_pos[0] = pos[0] + radius * math.cos(bobAngle)
         player_pos[1] = pos[1] + radius * math.sin(bobAngle)
         bobAcceleration = 0.0001 * math.cos(bobAngle)
