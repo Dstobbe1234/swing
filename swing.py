@@ -10,45 +10,29 @@ running = True
 player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() /2)
 mouse = False
 boost = 1
-
+gravity = 0.00001
+offsetX = random.randint(0, 5000)
+offsetY = random.randint(0, 5000)
 import matplotlib.pyplot as plt
 from perlin_noise import PerlinNoise
-
-
-def generateWorld():
-    noise = PerlinNoise(octaves=10, seed=1)
-    xpix = 64
-    ypix = 36
-    offsetX = random.randint(0, 5000)
-    offsetY = random.randint(0, 5000)
-    map = [[noise([i/xpix + offsetX, j/ypix + offsetY]) for j in range(xpix)] for i in range(ypix)]
-    for row in range(len(map)):
-        for i in range(len(map[row])):
-            if(map[row][i] >= -0.1):
-                pygame.draw.rect(screen, "white", (row + 20, i + 20, 20, 20))
-            
-
-
 
 def swing(mousePos, radius, angle, angleSpeed):
     mouse = True
 
     while mouse:
-
-        screen.fill("black")
+        draw()
         pygame.draw.line(screen, 'white', mousePos, player_pos, 1)
+        # pygame.draw.line(screen, "red", )
+        print(angle)
+        pygame.display.flip()
         swingPos = [player_pos.copy()]
-        global boost
-        bobAcceleration =  0.00001 * math.cos(angle) * boost
+        bobAcceleration =  (gravity/radius) * math.cos(angle)
         angleSpeed += bobAcceleration
         angle += angleSpeed
 
         swingPos.append([mousePos[0] + radius * math.cos(angle), mousePos[1] + radius * math.sin(angle)])   
         player_pos[0] = swingPos[1][0]
         player_pos[1] = swingPos[1][1]
-
-        pygame.draw.circle(screen, "white", player_pos, 10)
-        pygame.display.flip()
 
         ev = pygame.event.get()
         for event in ev:
@@ -70,14 +54,13 @@ def swing(mousePos, radius, angle, angleSpeed):
 def fall(bobSpeedVectors):
     mouse = False
     while not mouse:
-        screen.fill("black")
-        bobAcceleration = 0.001
+        draw()
+        pygame.display.flip()
+        bobAcceleration = gravity
         bobSpeedVectors[1] += bobAcceleration
         global player_pos
         player_pos[0] += bobSpeedVectors[0]
         player_pos[1] += bobSpeedVectors[1]
-        pygame.draw.circle(screen, "white", player_pos, 10)
-        pygame.display.flip()
         ev = pygame.event.get()
         for event in ev:
             if(event.type == pygame.MOUSEBUTTONDOWN):
@@ -89,14 +72,13 @@ def fall(bobSpeedVectors):
                 mouse = True
     swing(mousePos, radius, math.atan2(player_pos[1]- mousePos[1], player_pos[0] - mousePos[0]), bobSpeed)
 
-# def checkMouse():
-
-# def drawBob():
+def draw():
+    screen.fill("black")
+    pygame.draw.circle(screen, "white", player_pos, 10)
 
 
 while running:
     fall([0, 0])
-    clock.tick(1) 
 
 pygame.quit()
 
