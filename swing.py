@@ -3,87 +3,120 @@ import math
 import random
 clock = pygame.time.Clock()
 pygame.init()
-screenSize = [1280, 720]
+screenSize = [1200, 720]
 screen = pygame.display.set_mode((screenSize[0], screenSize[1]))
 clock = pygame.time.Clock()
 running = True
-player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() /2)
 mouse = False
 boost = 1
-gravity = 0.00001
+gravity = 0.0005
 offsetX = random.randint(0, 5000)
 offsetY = random.randint(0, 5000)
-import matplotlib.pyplot as plt
-from perlin_noise import PerlinNoise
 
-def swing(mousePos, radius, angle, angleSpeed):
-    mouse = True
+class Ball:
+    def __init__(self, x, y):
+        self.x  = x
+        self.y = y
+        self.acceleration = gravity
+        self.speedVectors = [0, 0]
+        self.angleSpeed = 0
+        self.angle = 0
+        self.radius = 0
+        self.mouse = False
+        self.mousePos = []
+        self.swinging = False
+    def swing(self):
+        self.angle = math.atan2(self.y- self.mousePos[1], self.x - self.mousePos[0])
+        while self.mouse:
+            self.draw()
 
-    while mouse:
-        draw()
-        pygame.draw.line(screen, 'white', mousePos, player_pos, 1)
-        # pygame.draw.line(screen, "red", )
-        print(angle)
-        pygame.display.flip()
-        swingPos = [player_pos.copy()]
-        bobAcceleration =  (gravity/radius) * math.cos(angle)
-        angleSpeed += bobAcceleration
-        angle += angleSpeed
 
-        swingPos.append([mousePos[0] + radius * math.cos(angle), mousePos[1] + radius * math.sin(angle)])   
-        player_pos[0] = swingPos[1][0]
-        player_pos[1] = swingPos[1][1]
+            ## position in pendulum before swing
+            swingPos = [[self.x, self.y]]
+            
+            ## Angular Acceleration
+            bobAcceleration =  (gravity/self.radius) * math.cos(self.angle)
 
-        ev = pygame.event.get()
-        for event in ev:
-            if(event.type == pygame.MOUSEBUTTONUP):
-                if(event.button == 1):
-                    bobSpeedVectors = [swingPos[1][0] - swingPos[0][0], swingPos[1][1] - swingPos[0][1]]
-                    mouse = False
-                elif(event.button == 3):
-                    boost = 1
-                    #bad
-            elif(event.type == pygame.MOUSEBUTTONDOWN):
-                if(event.button == 3):
-                    boost = 3
+            ## Angular Velocity
+            self.angleSpeed += bobAcceleration
 
-    fall(bobSpeedVectors)
+            ## Pendulum Angle
+            self.angle += self.angleSpeed
+
+            ## position after angle change
+            swingPos.append([self.mousePos[0] + self.radius * math.cos(self.angle), self.mousePos[1] + self.radius * math.sin(self.angle)])
+
+            ## position change
+            self.x = swingPos[1][0]
+            self.y = swingPos[1][1]
+
+            ## event loop
+            ev = pygame.event.get()
+            for event in ev:
+                if(event.type == pygame.MOUSEBUTTONUP):
+                    if(event.button == 1):
+
+                        ## Convert Angular speed into vectors
+                        self.speedVectors = [swingPos[1][0] - swingPos[0][0], swingPos[1][1] - swingPos[0][1]]
+                        self.mouse = False
+        self.fall()
+
+    def fall(self):
+        while not self.mouse:
+            self.draw()
+
+            self.acceleration = gravity
+
+            ## Y speed is affected by gravity
+            self.speedVectors[1] += self.acceleration
+
+            ## X position increases at a linear rate based on the final speed of the bob 
+            self.x += self.speedVectors[0]
+            self.y += self.speedVectors[1]
+
+            ev = pygame.event.get()
+            for event in ev:
+                if(event.type == pygame.MOUSEBUTTONDOWN):
+
+                    self.mousePos = pygame.mouse.get_pos()
+                    self.radius = math.sqrt(((self.y-self.mousePos[1])**2) + ((self.x-self.mousePos[0])**2))
+                    xDiff = self.x - self.mousePos[0]
+                    self.angleSpeed = math.atan(math.sqrt(self.speedVectors[0] ** 2 + self.speedVectors[1] ** 2) / self.radius) * (xDiff / abs(xDiff)) * (self.speedVectors[1] / abs(self.speedVectors[1]))
+                    self.mouse = True
+        self.swing()
     
-
-
-def fall(bobSpeedVectors):
-    mouse = False
-    while not mouse:
-        draw()
+    def draw(self):
+        screen.fill("black")
+        pygame.draw.circle(screen, "white", (self.x, self.y), 10)
+        if(self.mouse):
+            pygame.draw.line(screen, 'white', self.mousePos, (self.x, self.y), 1)
         pygame.display.flip()
-        bobAcceleration = gravity
-        bobSpeedVectors[1] += bobAcceleration
-        global player_pos
-        player_pos[0] += bobSpeedVectors[0]
-        player_pos[1] += bobSpeedVectors[1]
-        ev = pygame.event.get()
-        for event in ev:
-            if(event.type == pygame.MOUSEBUTTONDOWN):
-                mousePos = pygame.mouse.get_pos()
-                radius = math.sqrt(((player_pos[1]-mousePos[1])**2) + ((player_pos[0]-mousePos[0])**2))
-                xDiff = player_pos[0]  - mousePos[0]
-                bobSpeed = math.atan(math.sqrt(bobSpeedVectors[0] ** 2 + bobSpeedVectors[1] ** 2) / radius) * (xDiff / abs(xDiff)) * (bobSpeedVectors[1] / abs(bobSpeedVectors[1]))
-                ##NEEDS FIXING
-                mouse = True
-    swing(mousePos, radius, math.atan2(player_pos[1]- mousePos[1], player_pos[0] - mousePos[0]), bobSpeed)
-
-def draw():
-    screen.fill("black")
-    pygame.draw.circle(screen, "white", player_pos, 10)
 
 
+# class Terrain:
+#     def generate(self):
+
+
+
+
+
+
+
+
+ball = Ball(screenSize[0]/2, screenSize[1]/2)
+    
 while running:
-    fall([0, 0])
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+    ball.fall()
+    clock.tick(100)
+
+
 
 pygame.quit()
 
 
-            
 
 
     
