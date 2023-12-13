@@ -12,6 +12,8 @@ boost = 1
 gravity = 0.0005
 offsetX = random.randint(0, 5000)
 offsetY = random.randint(0, 5000)
+import numpy as np
+from matplotlib import pyplot as plt
 
 class Ball:
     def __init__(self, x, y):
@@ -55,11 +57,13 @@ class Ball:
             for event in ev:
                 if(event.type == pygame.MOUSEBUTTONUP):
                     if(event.button == 1):
-
                         ## Convert Angular speed into vectors
                         self.speedVectors = [swingPos[1][0] - swingPos[0][0], swingPos[1][1] - swingPos[0][1]]
+                        pendulum = Pendulum(math.sqrt(self.speedVectors[0]**2 + self.speedVectors[1]**2), self.y, self.x)
+                        pendulum.calculate()
+                        pygame.display.flip()
                         self.mouse = False
-        self.fall()
+        # self.fall()
 
     def fall(self):
         while not self.mouse:
@@ -92,14 +96,35 @@ class Ball:
             pygame.draw.line(screen, 'white', self.mousePos, (self.x, self.y), 1)
         pygame.display.flip()
 
+class Pendulum:
+    def __init__(self, initSpeed, h0, x0):
+        self.initSpeed = initSpeed
+        self.h0 = h0
+        self.x0 = x0
+    def calculate(self):
+        points = []
+        x = 0
+        for n in range(100):
+            x+= 100
+            y = (-1/2 * gravity * (x**2)) + (self.initSpeed * x) + self.h0
+            points.append([x, y])
+        print(points)
+            # s(t) = −1/2 (gx2) + v0x + h0
+        # pygame.draw.polygon(screen, "red", points)
+        data = np.array(points)
+        x, y = data.T
+        plt.scatter(x,y)
+        plt.show()
+
+
+        
+
+
+
 
 # class Terrain:
 #     def generate(self):
-
-
-
-
-
+#         self.mousePos = 
 
 
 
