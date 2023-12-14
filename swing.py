@@ -27,6 +27,7 @@ class Ball:
         self.mouse = False
         self.mousePos = []
         self.swinging = False
+        self.count = 0
     def swing(self):
         self.angle = math.atan2(self.y- self.mousePos[1], self.x - self.mousePos[0])
         while self.mouse:
@@ -66,7 +67,9 @@ class Ball:
         # self.fall()
 
     def fall(self):
+        points = []
         while not self.mouse:
+
             self.draw()
 
             self.acceleration = gravity
@@ -77,16 +80,27 @@ class Ball:
             ## X position increases at a linear rate based on the final speed of the bob 
             self.x += self.speedVectors[0]
             self.y += self.speedVectors[1]
-
+            points.append([self.x, self.y])
             ev = pygame.event.get()
             for event in ev:
                 if(event.type == pygame.MOUSEBUTTONDOWN):
-
+                    self.count +=1
                     self.mousePos = pygame.mouse.get_pos()
                     self.radius = math.sqrt(((self.y-self.mousePos[1])**2) + ((self.x-self.mousePos[0])**2))
                     xDiff = self.x - self.mousePos[0]
                     self.angleSpeed = math.atan(math.sqrt(self.speedVectors[0] ** 2 + self.speedVectors[1] ** 2) / self.radius) * (xDiff / abs(xDiff)) * (self.speedVectors[1] / abs(self.speedVectors[1]))
                     self.mouse = True
+                    if(self.count > 1):
+                        data = np.array(points)
+                        x, y = data.T
+                        polyline = np.linspace(points[0][0], points[-1][0], 100)
+                        model = np.poly1d(np.polyfit(x, y, 2))
+                        print(model)
+                        plt.subplot(1, 2, 2)
+                        plt.scatter(x,y)
+                        plt.plot(polyline, model(polyline), "red")
+                        plt.show()
+                        
         self.swing()
     
     def draw(self):
@@ -104,15 +118,18 @@ class Pendulum:
     def calculate(self):
         points = []
         x = 0
-        for n in range(100):
-            x+= 100
-            y = (-1/2 * gravity * (x**2)) + (self.initSpeed * x) + self.h0
+        for n in range(750):
+            x+= 1
+            y = (-1/2 * gravity * (((x * ball.speedVectors[0]) + ball.x)**2)) + (ball.speedVectors[1] * ((x * ball.speedVectors[0]) + ball.x)) + self.h0
             points.append([x, y])
-        print(points)
-            # s(t) = −1/2 (gx2) + v0x + h0
-        # pygame.draw.polygon(screen, "red", points)
+        print(gravity)
+        print(ball.speedVectors[1])
+        print(ball.speedVectors[0])
+        print(ball.x, ball.y)
+
         data = np.array(points)
         x, y = data.T
+        plt.subplot(1, 2, 2)
         plt.scatter(x,y)
         plt.show()
 
