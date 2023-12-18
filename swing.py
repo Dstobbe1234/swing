@@ -60,9 +60,6 @@ class Ball:
                     if(event.button == 1):
                         ## Convert Angular speed into vectors
                         self.speedVectors = [swingPos[1][0] - swingPos[0][0], swingPos[1][1] - swingPos[0][1]]
-                        pendulum = Pendulum(math.sqrt(self.speedVectors[0]**2 + self.speedVectors[1]**2), self.y, self.x)
-                        pendulum.calculate()
-                        pygame.display.flip()
                         self.mouse = False
         # self.fall()
 
@@ -84,22 +81,12 @@ class Ball:
             ev = pygame.event.get()
             for event in ev:
                 if(event.type == pygame.MOUSEBUTTONDOWN):
-                    self.count +=1
                     self.mousePos = pygame.mouse.get_pos()
                     self.radius = math.sqrt(((self.y-self.mousePos[1])**2) + ((self.x-self.mousePos[0])**2))
                     xDiff = self.x - self.mousePos[0]
+                    ##TODO: FIX 
                     self.angleSpeed = math.atan(math.sqrt(self.speedVectors[0] ** 2 + self.speedVectors[1] ** 2) / self.radius) * (xDiff / abs(xDiff)) * (self.speedVectors[1] / abs(self.speedVectors[1]))
                     self.mouse = True
-                    if(self.count > 1):
-                        data = np.array(points)
-                        x, y = data.T
-                        polyline = np.linspace(points[0][0], points[-1][0], 100)
-                        model = np.poly1d(np.polyfit(x, y, 2))
-                        print(model)
-                        plt.subplot(1, 2, 2)
-                        plt.scatter(x,y)
-                        plt.plot(polyline, model(polyline), "red")
-                        plt.show()
                         
         self.swing()
     
@@ -110,38 +97,23 @@ class Ball:
             pygame.draw.line(screen, 'white', self.mousePos, (self.x, self.y), 1)
         pygame.display.flip()
 
-class Pendulum:
-    def __init__(self, initSpeed, h0, x0):
-        self.initSpeed = initSpeed
-        self.h0 = h0
-        self.x0 = x0
-    def calculate(self):
-        points = []
-        x = 0
-        for n in range(750):
-            x+= 1
-            y = (-1/2 * gravity * (((x * ball.speedVectors[0]) + ball.x)**2)) + (ball.speedVectors[1] * ((x * ball.speedVectors[0]) + ball.x)) + self.h0
-            points.append([x, y])
-        print(gravity)
-        print(ball.speedVectors[1])
-        print(ball.speedVectors[0])
-        print(ball.x, ball.y)
-
-        data = np.array(points)
-        x, y = data.T
-        plt.subplot(1, 2, 2)
-        plt.scatter(x,y)
-        plt.show()
-
-
+class Prediction:
+    def __init__(self):
+        self.fallPos = []
+        self.pendulumPos = []
+    def plotFall(self, xSpeed, ySpeed):
         
+        randomX = random.randint()
+        y = ((ball.speedVectors[1] + (1/2 * gravity * ((x - ball.x)/ball.speedVectors[0])))*((x - ball.x)/ball.speedVectors[0]) + ball.y)
+
+    # def plotPendulum(self, speed, radius):
+
+# def generateWorld():
+#     for n in range(random.randint(5, 10)):
 
 
 
 
-# class Terrain:
-#     def generate(self):
-#         self.mousePos = 
 
 
 
