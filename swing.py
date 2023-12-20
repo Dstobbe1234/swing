@@ -30,6 +30,9 @@ class Ball:
         self.count = 0
     def swing(self):
         self.angle = math.atan2(self.y- self.mousePos[1], self.x - self.mousePos[0])
+        # dtheta = 0
+        # t = 0
+        # dt = 1
         while self.mouse:
             self.draw()
 
@@ -52,6 +55,16 @@ class Ball:
             ## position change
             self.x = swingPos[1][0]
             self.y = swingPos[1][1]
+           
+            # ddtheta = -1 * gravity * math.cos(self.angle)/self.radius
+            # dtheta = dtheta + ddtheta * dt
+            # self.angle = self.angle - dtheta * dt
+            # self.x = self.mousePos[0] + self.radius * math.cos(self.angle)
+            # self.y = (self.mousePos[1] + self.radius * math.sin(self.angle))
+            # t=t+dtheta
+            
+
+
 
             ## event loop
             ev = pygame.event.get()
@@ -86,6 +99,7 @@ class Ball:
                     xDiff = self.x - self.mousePos[0]
                     ##TODO: FIX 
                     self.angleSpeed = math.atan(math.sqrt(self.speedVectors[0] ** 2 + self.speedVectors[1] ** 2) / self.radius) * (xDiff / abs(xDiff)) * (self.speedVectors[1] / abs(self.speedVectors[1]))
+                    # self.angleSpeed = math.sqrt(self.speedVectors[0]**2 + self.speedVectors[0]**2) / self.radius
                     self.mouse = True
                         
         self.swing()
