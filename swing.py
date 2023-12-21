@@ -31,11 +31,12 @@ class Ball:
     def swing(self):
         self.angle = math.atan2(self.y- self.mousePos[1], self.x - self.mousePos[0])
         # dtheta = 0
-        # t = 0
+        t = 0
+        x = []
+        y = []
         # dt = 1
         while self.mouse:
             self.draw()
-
 
             ## position in pendulum before swing
             swingPos = [[self.x, self.y]]
@@ -55,13 +56,16 @@ class Ball:
             ## position change
             self.x = swingPos[1][0]
             self.y = swingPos[1][1]
-           
+            
             # ddtheta = -1 * gravity * math.cos(self.angle)/self.radius
             # dtheta = dtheta + ddtheta * dt
             # self.angle = self.angle - dtheta * dt
             # self.x = self.mousePos[0] + self.radius * math.cos(self.angle)
             # self.y = (self.mousePos[1] + self.radius * math.sin(self.angle))
-            # t=t+dtheta
+            x.append(t)
+            y.append(self.angle)
+            t +=1
+
             
 
 
@@ -72,6 +76,14 @@ class Ball:
                 if(event.type == pygame.MOUSEBUTTONUP):
                     if(event.button == 1):
                         ## Convert Angular speed into vectors
+                        # plt.plot(x, y)
+                        # x = np.linspace(x[0], x[-1], 100)
+                        # y = math.cos(x)
+                        # # print(x)
+                        # # y = gravity * math.cos(x) * self.radius
+                        # plt.plot(x, y)
+
+                        # plt.show()
                         self.speedVectors = [swingPos[1][0] - swingPos[0][0], swingPos[1][1] - swingPos[0][1]]
                         self.mouse = False
         # self.fall()
@@ -98,8 +110,10 @@ class Ball:
                     self.radius = math.sqrt(((self.y-self.mousePos[1])**2) + ((self.x-self.mousePos[0])**2))
                     xDiff = self.x - self.mousePos[0]
                     ##TODO: FIX 
-                    self.angleSpeed = math.atan(math.sqrt(self.speedVectors[0] ** 2 + self.speedVectors[1] ** 2) / self.radius) * (xDiff / abs(xDiff)) * (self.speedVectors[1] / abs(self.speedVectors[1]))
-                    # self.angleSpeed = math.sqrt(self.speedVectors[0]**2 + self.speedVectors[0]**2) / self.radius
+                    # self.angleSpeed = math.atan(math.sqrt(self.speedVectors[0] ** 2 + self.speedVectors[1] ** 2) / self.radius) * (xDiff / abs(xDiff)) * (self.speedVectors[1] / abs(self.speedVectors[1]))
+                    # self.angleSpeed = math.sqrt((self.speedVectors[0]**2) + (self.speedVectors[1]**2)) / self.radius * (xDiff / abs(xDiff)) * (self.speedVectors[1] / abs(self.speedVectors[1]))
+                    # print(self.speedVectors[0], self.speedVectors[1], self.radius)
+                    # print(self.angleSpeed)
                     self.mouse = True
                         
         self.swing()
