@@ -38,33 +38,37 @@ class Ball:
         while self.mouse:
             self.draw()
 
-            ## position in pendulum before swing
-            swingPos = [[self.x, self.y]]
+            # ## position in pendulum before swing
+            # swingPos = [[self.x, self.y]]
             
-            ## Angular Acceleration
-            bobAcceleration =  (gravity/self.radius) * math.cos(self.angle)
+            # ## Angular Acceleration
+            # bobAcceleration =  (gravity/self.radius) * math.cos(self.angle)
 
-            ## Angular Velocity
-            self.angleSpeed += bobAcceleration
+            # ## Angular Velocity
+            # self.angleSpeed += bobAcceleration
 
-            ## Pendulum Angle
-            self.angle += self.angleSpeed
+            # ## Pendulum Angle
+            # self.angle += self.angleSpeed
 
-            ## position after angle change
-            swingPos.append([self.mousePos[0] + self.radius * math.cos(self.angle), self.mousePos[1] + self.radius * math.sin(self.angle)])
+            # ## position after angle change
+            # swingPos.append([self.mousePos[0] + self.radius * math.cos(self.angle), self.mousePos[1] + self.radius * math.sin(self.angle)])
 
-            ## position change
-            self.x = swingPos[1][0]
-            self.y = swingPos[1][1]
+            # ## position change
+            # self.x = swingPos[1][0]
+            # self.y = swingPos[1][1]
             
-            # ddtheta = -1 * gravity * math.cos(self.angle)/self.radius
-            # dtheta = dtheta + ddtheta * dt
-            # self.angle = self.angle - dtheta * dt
-            # self.x = self.mousePos[0] + self.radius * math.cos(self.angle)
-            # self.y = (self.mousePos[1] + self.radius * math.sin(self.angle))
-            x.append(t)
-            y.append(self.angle)
-            t +=1
+            # # ddtheta = -1 * gravity * math.cos(self.angle)/self.radius
+            # # dtheta = dtheta + ddtheta * dt
+            # # self.angle = self.angle - dtheta * dt
+            # # self.x = self.mousePos[0] + self.radius * math.cos(self.angle)
+            # # self.y = (self.mousePos[1] + self.radius * math.sin(self.angle))
+            # x.append(t)
+            # y.append(self.angle)
+            # t +=1
+            # self.angle = math.atan2(self.y- self.mousePos[1], self.x - self.mousePos[0])
+            # x += math.cos(gravity * math.cos(self.angle)) - math.cos(gravity * math.sin(self.angle))
+            # y += math.sin(gravity * math.cos(self.angle)) - math.sin(gravity * math.sin(self.angle))
+
 
             
 
@@ -110,7 +114,7 @@ class Ball:
                     self.radius = math.sqrt(((self.y-self.mousePos[1])**2) + ((self.x-self.mousePos[0])**2))
                     xDiff = self.x - self.mousePos[0]
                     ##TODO: FIX 
-                    # self.angleSpeed = math.atan(math.sqrt(self.speedVectors[0] ** 2 + self.speedVectors[1] ** 2) / self.radius) * (xDiff / abs(xDiff)) * (self.speedVectors[1] / abs(self.speedVectors[1]))
+                    self.angleSpeed = math.atan(math.sqrt(self.speedVectors[0] ** 2 + self.speedVectors[1] ** 2) / self.radius) * (xDiff / abs(xDiff)) * (self.speedVectors[1] / abs(self.speedVectors[1]))
                     # self.angleSpeed = math.sqrt((self.speedVectors[0]**2) + (self.speedVectors[1]**2)) / self.radius * (xDiff / abs(xDiff)) * (self.speedVectors[1] / abs(self.speedVectors[1]))
                     # print(self.speedVectors[0], self.speedVectors[1], self.radius)
                     # print(self.angleSpeed)
