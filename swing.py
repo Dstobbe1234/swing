@@ -89,11 +89,6 @@ class Ball:
                 global running
                 running = False
 
-            # elif (pygame.K_w and self.mouse):
-            #     print("TEST")
-            #     self.angleSpeed += ((0.05 / self.radius) *
-            #                         (abs(self.angleSpeed)/self.angleSpeed))
-
     def draw(self):
         screen.fill("black")
         pygame.draw.circle(screen, "white", (self.x, self.y), 10)
@@ -104,6 +99,8 @@ class Ball:
 
 
 ball = Ball(screenSize[0]/2, screenSize[1]/2)
+
+
 
 
 def loop():
@@ -117,6 +114,8 @@ def loop():
         ball.draw()
 
         ball.checkMouse()
+
+        clock.tick(500)
 
 
 if __name__ == "__main__":
