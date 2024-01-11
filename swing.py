@@ -26,6 +26,7 @@ class Ball:
         self.radius = 0
         self.mouse = False
         self.mousePos = []
+        self.color = "white"
 
     def swing(self):
         # # position in pendulum before swing
@@ -86,16 +87,16 @@ class Ball:
                 self.mouse = False
 
             elif (event.type == pygame.QUIT):
+                print("quit")
                 global running
                 running = False
 
     def draw(self):
         screen.fill("black")
-        pygame.draw.circle(screen, "white", (self.x, self.y), 10)
+        pygame.draw.circle(screen, self.color, (self.x, self.y), 10)
         if (self.mouse):
             pygame.draw.line(screen, 'white', self.mousePos,
                              (self.x, self.y), 1)
-        pygame.display.flip()
 
 
 ball = Ball(screenSize[0]/2, screenSize[1]/2)
@@ -111,7 +112,9 @@ def loop():
         else:
             ball.fall()
 
+        screen.fill("black")
         ball.draw()
+        pygame.display.flip()
 
         ball.checkMouse()
 

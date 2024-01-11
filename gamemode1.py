@@ -1,20 +1,16 @@
 import matplotlib.pyplot as plt
 from perlin_noise import PerlinNoise
 import random
+import math
 
 pic = []
 noise = PerlinNoise(octaves=2, seed=1)
-offsetX = random.randint(0, 1000)
-offsetY = random.randint(0, 1000)
+# offsetX = random.randint(0, 1000)
+# offsetY = random.randint(0, 1000)
 xpix, ypix = 500, 500
-for i in range(offsetY, ypix + offsetY):
-    pic.append([])
-    for j in range(offsetX, xpix + offsetX):
-        initNoise = noise([i/xpix, j/ypix])
-        if (initNoise <= -0.07):
-            pic[-1].append(-1)
-        else:
-            pic[-1].append(1)
+# - max((abs(i * 2 - xpix)/xpix), (abs(i * 2 - ypix)/ypix))
+pic = [[noise([i/xpix, j/ypix]) - max((abs(j * 2 - xpix)/xpix), (abs(i * 2 - ypix)/ypix)) for j in range(xpix)] for i in range(ypix)] 
 
 plt.imshow(pic, cmap='gray')
 plt.show()
+
