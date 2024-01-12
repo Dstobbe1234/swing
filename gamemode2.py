@@ -12,30 +12,30 @@ mouse = False
 boost = 1
 gravity = 0.01
 
-
 class Trampoline:
-    def __init__(self, position, orientation):
-        self.position = position
+    def __init__(self, rect, orientation):
+        self.rect = rect
         self.orientation = orientation
 
     def checkCollision(self):
         testX = ball.x
         testY = ball.y
 
-        if (ball.x < self.position[0]):
-            testX = self.position[0]
-        elif (ball.x > self.position[0] + 100):
-            testX = self.position[0] + 100
+        if (ball.x < self.rect[0]):
+            testX = self.rect[0]
+        elif (ball.x > self.rect[0] + self.rect[2]):
+            testX = self.rect[0] + self.rect[2]
 
-        if (ball.y < self.position[1]):
-            testY = self.position[1]
-        elif (ball.y > self.position[1] + 5):
-            testY = self.position[1] + 5
+        if (ball.y < self.rect[1]):
+            testY = self.rect[1]
+        elif (ball.y > self.rect[1] + self.rect[3]):
+            testY = self.rect[1] + self.rect[3]
 
         distY = ball.y - testY
         distX = ball.x - testX
 
         if (math.sqrt(distX**2 + distY**2) <= 10):
+            self.collision = True
             self.bounce()
 
     def bounce(self):
@@ -45,25 +45,28 @@ class Trampoline:
             ball.angleSpeed *= -1
         else:
             if (self.orientation == "vert"):
+                ball.speedVectors[0] += abs(ball.speedVectors[0])/ball.speedVectors[0] * 0.05
                 ball.speedVectors[0] *= -1
             else:
+                ball.speedVectors[1] += abs(ball.speedVectors[1])/ball.speedVectors[1] * 0.05
                 ball.speedVectors[1] *= -1
 
     def draw(self):
         pygame.draw.rect(
-            screen, "white", (self.position[0], self.position[1], 100, 5))
+            screen, "white", (self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
 
 
 class Button:
     def __init__(self, position):
         self.position = position
-        self.rangeRadius = 50
+        self.rangeRadius = 150
         self.color = "white"
 
     def checkRange(self):
         if math.sqrt((self.position[0]-ball.x)**2 + (self.position[1]-ball.y)**2) <= 10 + self.rangeRadius:
             self.color = "red"
             return True
+        self.color = "white"
 
     def draw(self):
         pygame.draw.circle(
@@ -75,15 +78,19 @@ buttons = []
 
 
 def generateChunks():
-    possibleChunks = [[Trampoline(
-        [screenSize[0]/2, 500], "horiz"), Trampoline([screenSize[0]/2 + 100, 500], "horiz"), Button([screenSize[0]/2 + 50, 300])]]
-    randomIndex = random.randint(0, len(possibleChunks)-1)
-    randomChunk = possibleChunks[randomIndex]
-    for object in randomChunk:
-        if (type(object).__name__ == "Trampoline"):
-            trampolines.append(object)
-        else:
-            buttons.append(object)
+    chunkSize = 300
+    for n in range(30):
+        possibleChunks = [[Trampoline(
+            [chunkSize*n, 500, 50, 5], "horiz"), Trampoline([50 + chunkSize*n, 500, 50, 5], "horiz"), Button([120 + chunkSize*n, 300])], [Trampoline(
+            [chunkSize*n, 500, 50, 5], "horiz"), Button([100 + chunkSize*n, 300]), Trampoline([150 + chunkSize*n, 500, 50, 5], "horiz")]]
+        randomIndex = random.randint(0, len(possibleChunks)-1)
+        print(randomIndex)
+        randomChunk = possibleChunks[randomIndex]
+        for object in randomChunk:
+            if (type(object).__name__ == "Trampoline"):
+                trampolines.append(object)
+            else:
+                buttons.append(object)
 
 
 ball = Ball(screenSize[0]/2, screenSize[1]/2)
@@ -91,23 +98,24 @@ ball = Ball(screenSize[0]/2, screenSize[1]/2)
 
 def loop():
     while running:
-        inRange = False
         screen.fill("black")
         ball.draw()
         for trampoline in trampolines:
             trampoline.draw()
             trampoline.checkCollision()
-        # for button in buttons:
-        #     if button.checkRange():
-        #         inRange = True
-        #     button.draw()
+        ball.inRange = False
+        for button in buttons:
+            if button.checkRange():
+                ball.inRange = True
+                ball.mousePos = [button.position[0], button.position[1]]
+            button.draw()
         pygame.display.flip()
 
-        # if (ball.mouse and inRange):
         if (ball.mouse):
             ball.swing()
         else:
             ball.fall()
+
 
         ball.checkMouse()
 

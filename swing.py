@@ -27,6 +27,7 @@ class Ball:
         self.mouse = False
         self.mousePos = []
         self.color = "white"
+        self.inRange = False
 
     def swing(self):
         # # position in pendulum before swing
@@ -63,9 +64,7 @@ class Ball:
     def checkMouse(self):
         ev = pygame.event.get()
         for event in ev:
-            if (event.type == pygame.MOUSEBUTTONDOWN):
-                # GOING TO WANT TO MOVE THIS TO ABOVE SWING FUNCTION SO THAT I CAN MAKE MOUSEPOS BUTTON POSITION
-                self.mousePos = pygame.mouse.get_pos()
+            if (event.type == pygame.MOUSEBUTTONDOWN and self.inRange):
                 self.angle = math.atan2(
                     self.x - self.mousePos[0], self.y - self.mousePos[1])
 
@@ -81,7 +80,7 @@ class Ball:
                     self.angleSpeed *= -1
                 self.mouse = True
 
-            elif (event.type == pygame.MOUSEBUTTONUP):
+            elif (event.type == pygame.MOUSEBUTTONUP and self.mouse):
                 # Convert Angular speed into vectors
                 self.speedVectors = [
                     self.swingPos[1][0] - self.swingPos[0][0], self.swingPos[1][1] - self.swingPos[0][1]]
@@ -115,6 +114,7 @@ def loop():
         ball.draw()
         pygame.display.flip()
 
+        # ball.mousePos = pygame.mouse.get_pos()
         ball.checkMouse()
 
         clock.tick(500)
