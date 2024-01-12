@@ -64,6 +64,7 @@ class Ball:
         ev = pygame.event.get()
         for event in ev:
             if (event.type == pygame.MOUSEBUTTONDOWN):
+                # GOING TO WANT TO MOVE THIS TO ABOVE SWING FUNCTION SO THAT I CAN MAKE MOUSEPOS BUTTON POSITION
                 self.mousePos = pygame.mouse.get_pos()
                 self.angle = math.atan2(
                     self.x - self.mousePos[0], self.y - self.mousePos[1])
@@ -100,8 +101,6 @@ class Ball:
 
 
 ball = Ball(screenSize[0]/2, screenSize[1]/2)
-
-
 
 
 def loop():
