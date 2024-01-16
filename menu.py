@@ -1,9 +1,7 @@
-
-
 import pygame
-import math
-import random
-from swing import loop
+from gamemode1 import game1
+from gamemode2 import game2
+from skins import selectSkin
 clock = pygame.time.Clock()
 pygame.init()
 screenSize = [1200, 720]
@@ -27,18 +25,26 @@ class Button:
 
     def draw(self):
         pygame.draw.rect(screen, "green", self.rect)
-        screen.blit(self.text, (0, 0))
+        screen.blit(self.text, (self.rect[0], self.rect[1]))
 
 
 def menu():
-    button1 = Button([20, screenSize[1]/2, 50, 50], "game mode 1")
+    button1 = Button([150, screenSize[1]/2, 200, 200], "game mode 1")
     button2 = Button(
-        [screenSize[0] - 70, screenSize[1]/2, 50, 50], "game mode 2")
+        [screenSize[0] - 350, screenSize[1]/2, 200, 200], "game mode 2")
+    skin = Button(
+        [screenSize[0] - 80, 80, 60, 60], "skin")
+
+    screen.fill("black")
+    button1.draw()
+    button2.draw()
+    skin.draw()
+    pygame.display.flip()
     global running
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                return 0
 
             elif (button1.is_clicked(event)):
                 return 1
@@ -46,16 +52,20 @@ def menu():
             elif (button2.is_clicked(event)):
                 return 2
 
-        screen.fill("black")
-        button1.draw()
-        button2.draw()
-        pygame.display.flip()
+            elif (skin.is_clicked(event)):
+                return 3
 
 
-gameMode = menu()
-if (gameMode == 1):
-    # PLAY 1st GAME MODE
-    loop()
-elif (gameMode == 2):
-    # PLAY 2nd GAME MODE
-    loop()
+if __name__ == "__main__":
+    while True:
+        exitCode = menu()
+        if (exitCode == 0):
+            break
+        if (exitCode == 1):
+            # PLAY 1st GAME MODE
+            game1()
+        elif (exitCode == 2):
+            # PLAY 2nd GAME MODE
+            game2()
+        elif (exitCode == 3):
+            selectSkin()

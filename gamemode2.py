@@ -11,6 +11,38 @@ clock = pygame.time.Clock()
 mouse = False
 boost = 1
 gravity = 0.01
+chunkSize = 300
+chunkNum = 5
+ball = None
+background = None
+flag = None
+trampolines = None
+buttons = None
+
+
+class Background:
+    def __init__(self):
+        self.w = chunkSize * chunkNum
+        self.x = ball.x - screenSize[0]/2
+        self.y = screenSize[1]/2
+
+    def draw(self):
+        self.x = ball.x - screenSize[0]/2
+
+        screen.fill("black")
+        ball.draw()
+        flag.draw()
+        for trampoline in trampolines:
+            trampoline.draw()
+            trampoline.checkCollision()
+        ball.inRange = False
+        for button in buttons:
+            if button.checkRange():
+                ball.inRange = True
+                ball.mousePos = [button.position[0], button.position[1]]
+            button.draw()
+        pygame.display.flip()
+
 
 class Trampoline:
     def __init__(self, rect, orientation):
@@ -35,8 +67,11 @@ class Trampoline:
         distX = ball.x - testX
 
         if (math.sqrt(distX**2 + distY**2) <= 10):
-            self.collision = True
-            self.bounce()
+            if (not ball.bounceBool):
+                ball.bounceBool = True
+                self.bounce()
+        else:
+            ball.bounceBool = False
 
     def bounce(self):
         if (ball.mouse):
@@ -45,15 +80,17 @@ class Trampoline:
             ball.angleSpeed *= -1
         else:
             if (self.orientation == "vert"):
-                ball.speedVectors[0] += abs(ball.speedVectors[0])/ball.speedVectors[0] * 0.05
+                ball.speedVectors[0] += (abs(ball.speedVectors[0]) /
+                                         ball.speedVectors[0]) * 0.25
                 ball.speedVectors[0] *= -1
             else:
-                ball.speedVectors[1] += abs(ball.speedVectors[1])/ball.speedVectors[1] * 0.05
+                ball.speedVectors[1] += (abs(ball.speedVectors[1]) /
+                                         ball.speedVectors[1]) * 0.25
                 ball.speedVectors[1] *= -1
 
     def draw(self):
         pygame.draw.rect(
-            screen, "white", (self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
+            screen, "white", (self.rect[0] - background.x, self.rect[1], self.rect[2], self.rect[3]))
 
 
 class Button:
@@ -63,28 +100,22 @@ class Button:
         self.color = "white"
 
     def checkRange(self):
-        if math.sqrt((self.position[0]-ball.x)**2 + (self.position[1]-ball.y)**2) <= 10 + self.rangeRadius:
+        if (math.sqrt((self.position[0]-ball.x)**2 + (self.position[1]-ball.y)**2) <= 10 + self.rangeRadius) and not ball.mouse:
             self.color = "red"
             return True
         self.color = "white"
 
     def draw(self):
         pygame.draw.circle(
-            screen, self.color, (self.position[0], self.position[1]), 5)
-
-
-trampolines = []
-buttons = []
+            screen, self.color, (self.position[0] - background.x, self.position[1]), 5)
 
 
 def generateChunks():
-    chunkSize = 300
-    for n in range(30):
+    for n in range(chunkNum):
         possibleChunks = [[Trampoline(
-            [chunkSize*n, 500, 50, 5], "horiz"), Trampoline([50 + chunkSize*n, 500, 50, 5], "horiz"), Button([120 + chunkSize*n, 300])], [Trampoline(
-            [chunkSize*n, 500, 50, 5], "horiz"), Button([100 + chunkSize*n, 300]), Trampoline([150 + chunkSize*n, 500, 50, 5], "horiz")]]
+            [chunkSize*n, 500, 100, 5], "horiz"), Button([120 + chunkSize*n, 300])], [Trampoline(
+                [chunkSize*n, 500, 50, 5], "horiz"), Button([100 + chunkSize*n, 300]), Trampoline([150 + chunkSize*n, 500, 50, 5], "horiz")]]
         randomIndex = random.randint(0, len(possibleChunks)-1)
-        print(randomIndex)
         randomChunk = possibleChunks[randomIndex]
         for object in randomChunk:
             if (type(object).__name__ == "Trampoline"):
@@ -93,36 +124,63 @@ def generateChunks():
                 buttons.append(object)
 
 
-ball = Ball(screenSize[0]/2, screenSize[1]/2)
+class Flag():
+    def __init__(self, x):
+        self.x = x
+
+    def draw(self):
+        pygame.draw.line(screen, 'white', [self.x - background.x, 0],
+                         [self.x - background.x, screenSize[1]], 5)
+
+    def collision(self):
+        if (ball.x >= self.x):
+            return True
 
 
-def loop():
+def die():
+    if (ball.y >= screenSize[1]):
+        return True
+
+
+def game2():
+    global ball
+    global background
+    global flag
+    global buttons
+    global trampolines
+    ball = Ball(0, screenSize[1]/2)
+    ball.backgroundMove = True
+    trampolines = []
+    buttons = []
+    generateChunks()
+    background = Background()
+    flag = Flag(chunkNum * chunkSize)
     while running:
-        screen.fill("black")
-        ball.draw()
-        for trampoline in trampolines:
-            trampoline.draw()
-            trampoline.checkCollision()
-        ball.inRange = False
-        for button in buttons:
-            if button.checkRange():
-                ball.inRange = True
-                ball.mousePos = [button.position[0], button.position[1]]
-            button.draw()
-        pygame.display.flip()
-
+        background.draw()
         if (ball.mouse):
             ball.swing()
         else:
             ball.fall()
+        ev = pygame.event.get()
+        for event in ev:
+            if event.type == pygame.QUIT:
+                return
+            ball.checkMouse(event)
+        if (die()):
+            return
 
-
-        ball.checkMouse()
+        if (flag.collision()):
+            with open("persistantData.txt") as persistantDataFile:
+                lines = persistantDataFile.readlines()
+                lines[0] = str(int(lines[0]) + 5) + '\n'
+                with open("persistantData.txt", "w") as persistantDataFile:
+                    for line in lines:
+                        persistantDataFile.write(line)
+            return
 
         clock.tick(500)
 
 
 if __name__ == "__main__":
-    generateChunks()
-    loop()
+    game2()
     pygame.quit

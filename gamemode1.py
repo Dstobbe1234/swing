@@ -1,16 +1,39 @@
-import matplotlib.pyplot as plt
-from perlin_noise import PerlinNoise
+import pygame
 import random
+from swing import Ball, running
 import math
 
-pic = []
-noise = PerlinNoise(octaves=2, seed=1)
-# offsetX = random.randint(0, 1000)
-# offsetY = random.randint(0, 1000)
-xpix, ypix = 500, 500
-# - max((abs(i * 2 - xpix)/xpix), (abs(i * 2 - ypix)/ypix))
-pic = [[noise([i/xpix, j/ypix]) - max((abs(j * 2 - xpix)/xpix), (abs(i * 2 - ypix)/ypix)) for j in range(xpix)] for i in range(ypix)] 
+clock = pygame.time.Clock()
+pygame.init()
+screenSize = [1200, 720]
+screen = pygame.display.set_mode((screenSize[0], screenSize[1]))
+clock = pygame.time.Clock()
+mouse = False
+boost = 1
+gravity = 0.01
 
-plt.imshow(pic, cmap='gray')
-plt.show()
 
+def game1():
+    ball = Ball(screenSize[0]/2, screenSize[1]/2)
+    ball.backgroundMove = False
+    while running:
+        screen.fill("black")
+        ball.draw()
+        pygame.display.flip()
+        if (ball.mouse):
+            ball.swing()
+        else:
+            ball.fall()
+        ev = pygame.event.get()
+        for event in ev:
+            if event.type == pygame.QUIT:
+                return
+            ball.inRange = True
+            ball.mousePos = pygame.mouse.get_pos()
+            ball.checkMouse(event)
+        clock.tick(500)
+
+
+if __name__ == "__main__":
+    game1()
+    pygame.quit

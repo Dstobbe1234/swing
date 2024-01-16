@@ -11,8 +11,6 @@ running = True
 mouse = False
 boost = 1
 gravity = 0.01
-offsetX = random.randint(0, 5000)
-offsetY = random.randint(0, 5000)
 
 
 class Ball:
@@ -26,8 +24,14 @@ class Ball:
         self.radius = 0
         self.mouse = False
         self.mousePos = []
-        self.color = "white"
+        with open("persistantData.txt", "r") as persistantDataFile:
+            persistantData = persistantDataFile.read().split("\n")
+            selectedValList = list(map(float, persistantData[2].split(",")))
+            self.color = (
+                selectedValList[0], selectedValList[1], selectedValList[2], selectedValList[3])
         self.inRange = False
+        self.bounceBool = False
+        self.backgroundMove = False
 
     def swing(self):
         # # position in pendulum before swing
@@ -61,65 +65,43 @@ class Ball:
         self.x += self.speedVectors[0]
         self.y += self.speedVectors[1]
 
-    def checkMouse(self):
-        ev = pygame.event.get()
-        for event in ev:
-            if (event.type == pygame.MOUSEBUTTONDOWN and self.inRange):
-                self.angle = math.atan2(
-                    self.x - self.mousePos[0], self.y - self.mousePos[1])
+    def checkMouse(self, event):
+        if (event.type == pygame.MOUSEBUTTONDOWN and self.inRange):
 
-                self.radius = math.sqrt(
-                    ((self.y-self.mousePos[1])**2) + ((self.x-self.mousePos[0])**2))
+            self.angle = math.atan2(
+                self.x - self.mousePos[0], self.y - self.mousePos[1])
 
-                speed = abs((self.speedVectors[1] * math.sin(self.angle)) +
-                            (self.speedVectors[0] * math.cos(self.angle)))
+            self.radius = math.sqrt(
+                ((self.y-self.mousePos[1])**2) + ((self.x-self.mousePos[0])**2))
 
-                self.angleSpeed = math.atan2(speed, self.radius)
+            speed = abs((self.speedVectors[1] * math.sin(self.angle)) +
+                        (self.speedVectors[0] * math.cos(self.angle)))
 
-                if (self.x > self.mousePos[0]):
-                    self.angleSpeed *= -1
-                self.mouse = True
+            self.angleSpeed = math.atan2(speed, self.radius)
 
-            elif (event.type == pygame.MOUSEBUTTONUP and self.mouse):
-                # Convert Angular speed into vectors
-                self.speedVectors = [
-                    self.swingPos[1][0] - self.swingPos[0][0], self.swingPos[1][1] - self.swingPos[0][1]]
-                self.mouse = False
+            if (self.x > self.mousePos[0]):
+                self.angleSpeed *= -1
+            self.mouse = True
 
-            elif (event.type == pygame.QUIT):
-                print("quit")
-                global running
-                running = False
+        elif (event.type == pygame.MOUSEBUTTONUP and self.mouse):
+            # Convert Angular speed into vectors
+            self.speedVectors = [
+                self.swingPos[1][0] - self.swingPos[0][0], self.swingPos[1][1] - self.swingPos[0][1]]
+            self.mouse = False
 
     def draw(self):
-        screen.fill("black")
-        pygame.draw.circle(screen, self.color, (self.x, self.y), 10)
-        if (self.mouse):
-            pygame.draw.line(screen, 'white', self.mousePos,
-                             (self.x, self.y), 1)
-
-
-ball = Ball(screenSize[0]/2, screenSize[1]/2)
-
-
-def loop():
-    while running:
-
-        if (ball.mouse):
-            ball.swing()
+        if (self.backgroundMove):
+            self.drawX = screenSize[0]/2
         else:
-            ball.fall()
-
+            self.drawX = self.x
         screen.fill("black")
-        ball.draw()
-        pygame.display.flip()
-
-        # ball.mousePos = pygame.mouse.get_pos()
-        ball.checkMouse()
-
-        clock.tick(500)
-
-
-if __name__ == "__main__":
-    loop()
-    pygame.quit
+        pygame.draw.circle(screen, self.color,
+                           (self.drawX, self.y), 10)
+        pygame.draw.circle(screen, self.color, (self.drawX, self.y), 10)
+        if (self.mouse):
+            if (self.backgroundMove):
+                pygame.draw.line(screen, 'white', [self.mousePos[0] - (self.x - screenSize[0]/2), self.mousePos[1]],
+                                 (self.drawX, self.y), 1)
+            else:
+                pygame.draw.line(screen, 'white', [self.mousePos[0], self.mousePos[1]],
+                                 (self.drawX, self.y), 1)
